@@ -380,6 +380,7 @@ public class Connect {
 	System.out.println(con.printMoney(2));
 	System.out.println(con.printMoney(3));
 
+	System.out.println("\n !!! close connection");
 	con.CloseConnection();
     }
 
