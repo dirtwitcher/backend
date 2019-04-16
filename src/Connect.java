@@ -1,13 +1,20 @@
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 public class Connect {
     public static Connection Connection = null;
     public static String TransactionTableName = "TRANSVLAD916"; // table of transactions
     public static String AccountTableName = "ACCVLAD916"; // table of accounts
+    public static Integer idAcc = 1;
 
     public Connection connectToDB2() {
 	if (Connection != null)
@@ -176,6 +183,26 @@ public class Connect {
 	return name;
     }
 
+    public Integer viewId(String log, String pass) {
+	Integer idAcc = null;
+	try {
+	    ResultSet result = null;
+	    Statement statement = connectToDB2().createStatement();
+	    String viewName = "SELECT ACCOUNT_ID FROM " + AccountTableName + " where NAME=" + log + " AND PASSWORD="
+		    + pass + ";";
+	    result = statement.executeQuery(viewName);
+	    if (result.next()) {
+		idAcc = result.getInt(1);
+	    }
+	    result.close();
+	    statement.close();
+	} catch (SQLException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	return idAcc;
+    }
+
     public void closeStatusAccount(int id) {
 	try {
 	    if (isAccInTable(id)) {
@@ -277,7 +304,7 @@ public class Connect {
 	return sub;
     }
 
-    public void transactMoney(int fromId, int toId, int money) {
+    public int transactMoney(int fromId, int toId, int money) {
 	int sub = 0;
 	try {
 	    if (isAccInTable(fromId) && isAccInTable(toId)) {
@@ -302,86 +329,257 @@ public class Connect {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
+	return printMoney(fromId);
     }
 
     public static void main(String[] args) {
 	Connect con = new Connect();
-
 	con.createTables();
+	con.connectToDB2();
 
-	System.out.println("\n !!! insertAcc");
-	con.insertAccount(1, "Vlad", 1, "111");
-	con.insertAccount(2, "petua", 1, "222");
-	con.insertAccount(3, "vasya", 0, "333");
+	int count = 10;
 
-	System.out.println("\n !!! put money on acc not found");
-	con.putMoney(4, 100);
+	try {
+	    ServerSocket serverSock = new ServerSocket(48916);
+	    System.out.println("Wait for new connections");
+	    while (count > 0) {
 
-	System.out.println("\n !!! put 100 Money on 1 and 2");
-	con.putMoney(1, 100);
-	con.putMoney(2, 100);
+		Socket sock = serverSock.accept(); // wait. listening
 
-	System.out.println("\n !!! put money on close acc");
-	con.putMoney(3, 100);
+		InputStream sis = sock.getInputStream();
+		BufferedReader br = new BufferedReader(new InputStreamReader(sis));
+		String request = br.readLine(); // Now you get SOME index.html HTTP/1.1
+		System.out.println("request = " + request);
 
-	System.out.println("\n !!! printMoney");
-	System.out.println(con.printMoney(1));
-	System.out.println(con.printMoney(2));
-	System.out.println(con.printMoney(3));
+		String[] requestParam = request.split(" ");
+		String requestURL = requestParam[1];
 
-	System.out.println("\n !!! take money from close acc");
-	con.takeMoney(3, 10);
+		System.out.println("requestURL = " + requestURL);
 
-	System.out.println("\n !!! take a lot money");
-	con.takeMoney(2, 999);
+		if (requestURL.equals("/favicon.ico")) {
+		    System.out.println("Ignoring /favicon.ico : '" + requestURL + "'");
+		    continue;
+		}
 
-	System.out.println("\n !!! transact money from close acc");
-	con.transactMoney(3, 1, 10);
+		String[] requestedParm = requestURL.split("/");
+		String action = requestedParm[1];
 
-	System.out.println("\n !!! transact money to close acc");
-	con.transactMoney(1, 3, 10);
+//	!!!	!!!	AUTH	!!!	////////////////
+		if (action.equals("auth")) {
+		    String log = "";
+		    String pass = "";
+		    try {
+			log = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+		    try {
+			pass = requestedParm[3];
+		    } catch (Exception e) {
+		    }
 
-	System.out.println("\n !!! open 3 acc");
-	con.openStatusAccount(3);
+		    System.out.println("action: " + action + " log: " + log + " pass: " + pass);
 
-	System.out.println("\n !!! put 100 Money on 3");
-	con.putMoney(3, 100);
+		    System.out.println("Handle 'auth' action");
 
-	System.out.println("\n !!! printMoney");
-	System.out.println(con.printMoney(1));
-	System.out.println(con.printMoney(2));
-	System.out.println(con.printMoney(3));
+		    int isAcc = 0;
+		    if (con.viewId(log, pass) != null) {
+			if ((con.isAccInTable(con.viewId(log, pass)))
+				&& con.checkStatusAccount(con.viewId(log, pass))) {
+			    isAcc = 1;
+			} else {
+			    isAcc = 0;
+			}
+		    }
 
-	System.out.println("\n !!! put and take Money");
-	con.putMoney(1, 50);
-	con.takeMoney(3, 50);
+		    Date today = new Date();
+		    String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+			    + "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
 
-	System.out.println("\n !!! printMoney");
-	System.out.println(con.printMoney(1));
-	System.out.println(con.printMoney(2));
-	System.out.println(con.printMoney(3));
+		    String output = "{ \"idHeader\": " + con.viewId(log, pass) + ", \"iAmInAcc\": " + isAcc + " }";
 
-	System.out.println("\n !!! viewName");
-	System.out.println(con.viewAccName(1));
-	System.out.println(con.viewAccName(2));
-	System.out.println(con.viewAccName(3));
+		    System.out.println(output);
 
-	System.out.println("\n !!! chech status 3 acc");
-	con.checkStatusAccount(3);
+		    String httpResponse = header + output;
 
-	System.out.println("\n !!! del 3 acc");
-	con.deleteAccount(3);
+		    sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
 
-	System.out.println("\n !!! transact from 1 to 2");
-	con.transactMoney(1, 2, 15);
+		    br.close();
+		    count--;
+		} else
 
-	System.out.println("\n !!! printMoney");
-	System.out.println(con.printMoney(1));
-	System.out.println(con.printMoney(2));
-	System.out.println(con.printMoney(3));
+//	!!!	!!!	REGISTR	!!!	////////////////
+		if (action.equals("registr")) {
+		    String log = "";
+		    String pass = "";
+		    try {
+			log = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+		    try {
+			pass = requestedParm[3];
+		    } catch (Exception e) {
+		    }
 
-	System.out.println("\n !!! close connection");
-	con.CloseConnection();
+		    System.out.println("action: " + action + " log: " + log + " pass: " + pass);
+
+		    System.out.println("Handle 'registr' action");
+
+		    if (con.viewId(log, pass) == null) {
+			con.insertAccount(idAcc, log, 1, pass);
+			idAcc++;
+		    }
+
+		    br.close();
+		    count--;
+		} else
+
+//	!!!	!!!	PUT	!!!	////////////////
+		if (action.equals("put")) {
+		    String id = "";
+		    String money = "";
+		    try {
+			id = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+		    try {
+			money = requestedParm[3];
+		    } catch (Exception e) {
+		    }
+
+		    System.out.println("action: " + action + " id: " + id + " money: " + money);
+
+		    System.out.println("Handle 'put' action");
+
+		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+
+			Date today = new Date();
+			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
+
+			String output = "{ \"moneyOper\": "
+				+ con.putMoney(Integer.parseInt(id), Integer.parseInt(money)) + " }";
+
+			System.out.println(output);
+
+			String httpResponse = header + output;
+
+			sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+		    }
+		    br.close();
+		    count--;
+		} else
+
+//	!!!	!!!	TAKE	!!!	////////////////
+		if (action.equals("take")) {
+		    String id = "";
+		    String money = "";
+		    try {
+			id = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+		    try {
+			money = requestedParm[3];
+		    } catch (Exception e) {
+		    }
+
+		    System.out.println("action: " + action + " id: " + id + " money: " + money);
+
+		    System.out.println("Handle 'take' action");
+
+		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+
+			Date today = new Date();
+			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
+
+			String output = "{ \"moneyOper\": "
+				+ con.takeMoney(Integer.parseInt(id), Integer.parseInt(money)) + " }";
+
+			System.out.println(output);
+
+			String httpResponse = header + output;
+
+			sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+		    }
+		    br.close();
+		    count--;
+		} else
+
+//	!!!	!!!	TRANSACT	!!!	////////////////
+		if (action.equals("transact")) {
+		    String id = "";
+		    String otherId = "";
+		    String money = "";
+		    try {
+			id = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+		    try {
+			otherId = requestedParm[3];
+		    } catch (Exception e) {
+		    }
+		    try {
+			money = requestedParm[4];
+		    } catch (Exception e) {
+		    }
+
+		    System.out
+			    .println("action: " + action + " id: " + id + " otherId: " + otherId + " money: " + money);
+
+		    System.out.println("Handle 'transact' action");
+
+		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+
+			Date today = new Date();
+			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
+
+			String output = "{ \"moneyOper\": " + con.transactMoney(Integer.parseInt(id),
+				Integer.parseInt(otherId), Integer.parseInt(money)) + " }";
+
+			System.out.println(output);
+
+			String httpResponse = header + output;
+
+			sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+		    }
+		    br.close();
+		    count--;
+		} else
+
+//	!!!	!!!	PRINT	!!!	////////////////
+		if (action.equals("print")) {
+		    String id = "";
+		    try {
+			id = requestedParm[2];
+		    } catch (Exception e) {
+		    }
+
+		    System.out.println("action: " + action + " id: " + id);
+
+		    System.out.println("Handle 'print' action");
+
+		    if (con.isAccInTable(Integer.parseInt(id))) {
+
+			Date today = new Date();
+			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
+
+			String output = "{ \"moneyOper\": " + con.printMoney(Integer.parseInt(id)) + " }";
+
+			System.out.println(output);
+
+			String httpResponse = header + output;
+
+			sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+		    }
+		    br.close();
+		    count--;
+		}
+
+	    }
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
-
 }

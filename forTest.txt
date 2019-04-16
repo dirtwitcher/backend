@@ -1,0 +1,61 @@
+
+    /*
+     * // TESTS !!! System.out.println("\n !!! insertAcc"); con.insertAccount(1,
+     * "Vlad", 1, "111"); con.insertAccount(2, "petua", 1, "222");
+     * con.insertAccount(3, "vasya", 0, "333");
+     * 
+     * System.out.println("\n !!! put money on acc not found"); con.putMoney(4,
+     * 100);
+     * 
+     * System.out.println("\n !!! put 100 Money on 1 and 2"); con.putMoney(1, 100);
+     * con.putMoney(2, 100);
+     * 
+     * System.out.println("\n !!! put money on close acc"); con.putMoney(3, 100);
+     * 
+     * System.out.println("\n !!! printMoney");
+     * System.out.println(con.printMoney(1)); System.out.println(con.printMoney(2));
+     * System.out.println(con.printMoney(3));
+     * 
+     * System.out.println("\n !!! take money from close acc"); con.takeMoney(3, 10);
+     * 
+     * System.out.println("\n !!! take a lot money"); con.takeMoney(2, 999);
+     * 
+     * System.out.println("\n !!! transact money from close acc");
+     * con.transactMoney(3, 1, 10);
+     * 
+     * System.out.println("\n !!! transact money to close acc");
+     * con.transactMoney(1, 3, 10);
+     * 
+     * System.out.println("\n !!! open 3 acc"); con.openStatusAccount(3);
+     * 
+     * System.out.println("\n !!! put 100 Money on 3"); con.putMoney(3, 100);
+     * 
+     * System.out.println("\n !!! printMoney");
+     * System.out.println(con.printMoney(1)); System.out.println(con.printMoney(2));
+     * System.out.println(con.printMoney(3));
+     * 
+     * System.out.println("\n !!! put and take Money"); con.putMoney(1, 50);
+     * con.takeMoney(3, 50);
+     * 
+     * System.out.println("\n !!! printMoney");
+     * System.out.println(con.printMoney(1)); System.out.println(con.printMoney(2));
+     * System.out.println(con.printMoney(3));
+     * 
+     * System.out.println("\n !!! viewName");
+     * System.out.println(con.viewAccName(1));
+     * System.out.println(con.viewAccName(2));
+     * System.out.println(con.viewAccName(3));
+     * 
+     * System.out.println("\n !!! chech status 3 acc"); con.checkStatusAccount(3);
+     * 
+     * System.out.println("\n !!! del 3 acc"); con.deleteAccount(3);
+     * 
+     * System.out.println("\n !!! transact from 1 to 2"); con.transactMoney(1, 2,
+     * 15);
+     * 
+     * System.out.println("\n !!! printMoney");
+     * System.out.println(con.printMoney(1)); System.out.println(con.printMoney(2));
+     * System.out.println(con.printMoney(3));
+     * 
+     * System.out.println("\n !!! close connection"); con.CloseConnection();
+     */
