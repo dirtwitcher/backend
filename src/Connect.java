@@ -76,7 +76,7 @@ public class Connect {
 
 	    statement.executeUpdate("DROP TABLE " + TransactionTableName + ";");
 	    statement.executeUpdate("DROP TABLE " + AccountTableName + ";");
-	    System.out.println("drop table done");
+	    System.out.println("drop tables done");
 	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
@@ -110,7 +110,6 @@ public class Connect {
     public boolean checkStatusAccount(int id) {
 	boolean accInOpenMode = false;
 	try {
-	    // if (isAccInTable(id)) {
 	    Statement statement = connectToDB2().createStatement();
 	    String checkAccount = "SELECT STATUS FROM " + AccountTableName + " where ACCOUNT_ID='" + id + "';";
 	    ResultSet res = statement.executeQuery(checkAccount);
@@ -124,7 +123,6 @@ public class Connect {
 	    }
 	    res.close();
 	    statement.close();
-	    // }
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -134,14 +132,12 @@ public class Connect {
 
     public void insertAccount(int id, String name, int status, String pass) {
 	try {
-	    if (!isAccInTable(id)) {
-		Statement statement = connectToDB2().createStatement();
-		String InsertInfo = "INSERT INTO " + AccountTableName + " (ACCOUNT_ID,NAME,STATUS,PASSWORD) "
-			+ "VALUES (" + id + ",'" + name + "'," + status + ",'" + pass + "'" + ");";
-		statement.executeUpdate(InsertInfo);
-		System.out.println(id + " acc insert done");
-		statement.close();
-	    }
+	    Statement statement = connectToDB2().createStatement();
+	    String InsertInfo = "INSERT INTO " + AccountTableName + " (ACCOUNT_ID,NAME,STATUS,PASSWORD) " + "VALUES ("
+		    + id + ",'" + name + "'," + status + ",'" + pass + "'" + ");";
+	    statement.executeUpdate(InsertInfo);
+	    System.out.println(id + " acc insert done");
+	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -150,12 +146,11 @@ public class Connect {
 
     public void deleteAccount(int id) {
 	try {
-	    if (isAccInTable(id)) {
-		Statement statement = connectToDB2().createStatement();
-		String deleteInfo = "DELETE FROM " + AccountTableName + " WHERE ACCOUNT_ID = " + id + ";";
-		statement.executeUpdate(deleteInfo);
-		statement.close();
-	    }
+	    Statement statement = connectToDB2().createStatement();
+	    String deleteInfo = "DELETE FROM " + AccountTableName + " WHERE ACCOUNT_ID = " + id + ";";
+	    statement.executeUpdate(deleteInfo);
+	    System.out.println(id + " acc drop done");
+	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -165,17 +160,16 @@ public class Connect {
     public String viewAccName(int id) {
 	String name = null;
 	try {
-	    if (isAccInTable(id)) {
-		ResultSet result = null;
-		Statement statement = connectToDB2().createStatement();
-		String viewName = "SELECT NAME FROM " + AccountTableName + " WHERE ACCOUNT_ID = '" + id + "';";
-		result = statement.executeQuery(viewName);
-		if (result.next()) {
-		    name = result.getString(1);
-		}
-		result.close();
-		statement.close();
+	    ResultSet result = null;
+	    Statement statement = connectToDB2().createStatement();
+	    String viewName = "SELECT NAME FROM " + AccountTableName + " WHERE ACCOUNT_ID = '" + id + "';";
+	    result = statement.executeQuery(viewName);
+	    if (result.next()) {
+		name = result.getString(1);
+		System.out.println("name: " + name);
 	    }
+	    result.close();
+	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -184,7 +178,7 @@ public class Connect {
     }
 
     public Integer viewId(String log, String pass) {
-	Integer idAcc = null;
+	Integer idAccView = 0;
 	try {
 	    ResultSet result = null;
 	    Statement statement = connectToDB2().createStatement();
@@ -192,7 +186,7 @@ public class Connect {
 		    + pass + ";";
 	    result = statement.executeQuery(viewName);
 	    if (result.next()) {
-		idAcc = result.getInt(1);
+		idAccView = result.getInt(1);
 	    }
 	    result.close();
 	    statement.close();
@@ -200,20 +194,16 @@ public class Connect {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	return idAcc;
+	return idAccView;
     }
 
     public void closeStatusAccount(int id) {
 	try {
-	    if (isAccInTable(id)) {
-		Statement statement = connectToDB2().createStatement();
-		if (checkStatusAccount(id)) {
-		    String ChangeStatus = "UPDATE " + AccountTableName + " SET STATUS=0 WHERE ACCOUNT_ID=" + id + ";";
-		    statement.executeUpdate(ChangeStatus);
-		}
-		System.out.println(id + " now acc status closed");
-		statement.close();
-	    }
+	    Statement statement = connectToDB2().createStatement();
+	    String ChangeStatus = "UPDATE " + AccountTableName + " SET STATUS=0 WHERE ACCOUNT_ID=" + id + ";";
+	    statement.executeUpdate(ChangeStatus);
+	    System.out.println(id + " now acc status closed");
+	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -222,15 +212,11 @@ public class Connect {
 
     public void openStatusAccount(int id) {
 	try {
-	    if (isAccInTable(id)) {
-		Statement statement = connectToDB2().createStatement();
-		if (!checkStatusAccount(id)) {
-		    String ChangeStatus = "UPDATE " + AccountTableName + " SET STATUS=1 WHERE ACCOUNT_ID=" + id + ";";
-		    statement.executeUpdate(ChangeStatus);
-		    System.out.println(id + " now status acc in open mode");
-		}
-		statement.close();
-	    }
+	    Statement statement = connectToDB2().createStatement();
+	    String ChangeStatus = "UPDATE " + AccountTableName + " SET STATUS=1 WHERE ACCOUNT_ID=" + id + ";";
+	    statement.executeUpdate(ChangeStatus);
+	    System.out.println(id + " now status acc in open mode");
+	    statement.close();
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -240,20 +226,17 @@ public class Connect {
     public int printMoney(int id) {
 	int sum = 0;
 	try {
-	    if (isAccInTable(id)) {
-		// if (checkStatusAccount(id)) {
-		ResultSet result = null;
-		Statement statement = connectToDB2().createStatement();
-		String youreCash = "SELECT ACCOUNT_ID,SUM(AMOUNT) AS BALANCE FROM " + TransactionTableName
-			+ " where ACCOUNT_ID=" + id + " GROUP BY ACCOUNT_ID;";
-		result = statement.executeQuery(youreCash);
-		if (result.next()) {
-		    sum = result.getInt(2);
-		}
-		result.close();
-		statement.close();
+	    ResultSet result = null;
+	    Statement statement = connectToDB2().createStatement();
+	    String youreCash = "SELECT ACCOUNT_ID,SUM(AMOUNT) AS BALANCE FROM " + TransactionTableName
+		    + " where ACCOUNT_ID=" + id + " GROUP BY ACCOUNT_ID;";
+	    result = statement.executeQuery(youreCash);
+	    if (result.next()) {
+		sum = result.getInt(2);
 	    }
-	    // }
+	    result.close();
+	    statement.close();
+	    System.out.println("print money. acc: " + id + ", money: " + sum);
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -261,83 +244,68 @@ public class Connect {
 	return sum;
     }
 
-    public int putMoney(int id, int money) {
+    public void putMoney(int id, int money) {
 	try {
-	    if (isAccInTable(id)) {
-		if (checkStatusAccount(id)) {
-		    Statement statement = connectToDB2().createStatement();
-		    String makeTrans = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES(" + id
-			    + "," + money + ");";
-		    statement.executeUpdate(makeTrans);
-		    statement.close();
-		}
-	    }
+	    Statement statement = connectToDB2().createStatement();
+	    String makeTrans = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES(" + id + ","
+		    + money + ");";
+	    statement.executeUpdate(makeTrans);
+	    statement.close();
+	    System.out.println("acc: " + id + " + " + money + "$$");
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	return printMoney(id);
     }
 
-    public int takeMoney(int id, int money) {
+    public void takeMoney(int id, int money) {
 	int sub = 0;
 	try {
-	    if (isAccInTable(id)) {
-		if (checkStatusAccount(id)) {
-		    Statement statement = connectToDB2().createStatement();
-		    sub = printMoney(id) - money;
-		    if (sub >= 0) {
-			String makeTrans = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES("
-				+ id + ",'-" + (money) + "');";
-			statement.executeUpdate(makeTrans);
-			statement.close();
-		    } else {
-			System.out.println("No enough money on ballance.");
-			return 0;
-		    }
-		}
+	    Statement statement = connectToDB2().createStatement();
+	    sub = printMoney(id) - money;
+	    if (sub >= 0) {
+		String makeTrans = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES(" + id
+			+ ",'-" + (money) + "');";
+		statement.executeUpdate(makeTrans);
+		statement.close();
+		System.out.println("acc: " + id + " - " + money + "$$");
+	    } else {
+		System.out.println("No enough money on ballance.");
 	    }
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	return sub;
     }
 
-    public int transactMoney(int fromId, int toId, int money) {
+    public void transactMoney(int fromId, int toId, int money) {
 	int sub = 0;
 	try {
-	    if (isAccInTable(fromId) && isAccInTable(toId)) {
-		if (checkStatusAccount(fromId) && checkStatusAccount(toId)) {
-		    Statement statement = connectToDB2().createStatement();
-		    sub = printMoney(fromId) - money;
-		    if (sub >= 0) {
-			String makeTransTake = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) "
-				+ "VALUES(" + fromId + ",'-" + (money) + "');";
-			statement.executeUpdate(makeTransTake);
+	    Statement statement = connectToDB2().createStatement();
+	    sub = printMoney(fromId) - money;
+	    if (sub >= 0) {
+		String makeTransTake = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES("
+			+ fromId + ",'-" + (money) + "');";
+		statement.executeUpdate(makeTransTake);
 
-			String makeTransPut = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) "
-				+ "VALUES(" + toId + "," + money + ");";
-			statement.executeUpdate(makeTransPut);
-			statement.close();
-		    } else {
-			System.out.println("No enough money on ballance.");
-		    }
-		}
+		String makeTransPut = "INSERT INTO " + TransactionTableName + " (ACCOUNT_ID,AMOUNT) " + "VALUES(" + toId
+			+ "," + money + ");";
+		statement.executeUpdate(makeTransPut);
+		statement.close();
+	    } else {
+		System.out.println("No enough money on ballance.");
 	    }
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	return printMoney(fromId);
     }
 
     public static void main(String[] args) {
 	Connect con = new Connect();
 	con.createTables();
-	con.connectToDB2();
 
-	int count = 10;
+	int count = 200;
 
 	try {
 	    ServerSocket serverSock = new ServerSocket(48916);
@@ -353,7 +321,6 @@ public class Connect {
 
 		String[] requestParam = request.split(" ");
 		String requestURL = requestParam[1];
-
 		System.out.println("requestURL = " + requestURL);
 
 		if (requestURL.equals("/favicon.ico")) {
@@ -379,16 +346,11 @@ public class Connect {
 
 		    System.out.println("action: " + action + " log: " + log + " pass: " + pass);
 
-		    System.out.println("Handle 'auth' action");
-
 		    int isAcc = 0;
-		    if (con.viewId(log, pass) != null) {
-			if ((con.isAccInTable(con.viewId(log, pass)))
-				&& con.checkStatusAccount(con.viewId(log, pass))) {
-			    isAcc = 1;
-			} else {
-			    isAcc = 0;
-			}
+		    if (con.viewId(log, pass) != 0) {
+			isAcc = 1;
+		    } else {
+			isAcc = 0;
 		    }
 
 		    Date today = new Date();
@@ -422,9 +384,7 @@ public class Connect {
 
 		    System.out.println("action: " + action + " log: " + log + " pass: " + pass);
 
-		    System.out.println("Handle 'registr' action");
-
-		    if (con.viewId(log, pass) == null) {
+		    if (con.viewId(log, pass) == 0) {
 			con.insertAccount(idAcc, log, 1, pass);
 			idAcc++;
 		    }
@@ -448,16 +408,15 @@ public class Connect {
 
 		    System.out.println("action: " + action + " id: " + id + " money: " + money);
 
-		    System.out.println("Handle 'put' action");
-
 		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+
+			con.putMoney(Integer.parseInt(id), Integer.parseInt(money));
 
 			Date today = new Date();
 			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
 				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
 
-			String output = "{ \"moneyOper\": "
-				+ con.putMoney(Integer.parseInt(id), Integer.parseInt(money)) + " }";
+			String output = "{ \"moneyOper\": " + con.printMoney(Integer.parseInt(id)) + " }";
 
 			System.out.println(output);
 
@@ -484,16 +443,15 @@ public class Connect {
 
 		    System.out.println("action: " + action + " id: " + id + " money: " + money);
 
-		    System.out.println("Handle 'take' action");
-
 		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+
+			con.takeMoney(Integer.parseInt(id), Integer.parseInt(money));
 
 			Date today = new Date();
 			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
 				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
 
-			String output = "{ \"moneyOper\": "
-				+ con.takeMoney(Integer.parseInt(id), Integer.parseInt(money)) + " }";
+			String output = "{ \"moneyOper\": " + con.printMoney(Integer.parseInt(id)) + " }";
 
 			System.out.println(output);
 
@@ -526,22 +484,24 @@ public class Connect {
 		    System.out
 			    .println("action: " + action + " id: " + id + " otherId: " + otherId + " money: " + money);
 
-		    System.out.println("Handle 'transact' action");
+		    if (con.isAccInTable(Integer.parseInt(id)) && con.isAccInTable(Integer.parseInt(otherId))) {
+			if (con.checkStatusAccount(Integer.parseInt(id))
+				&& con.checkStatusAccount(Integer.parseInt(otherId))) {
 
-		    if ((con.isAccInTable(Integer.parseInt(id))) && con.checkStatusAccount(Integer.parseInt(id))) {
+			    con.transactMoney(Integer.parseInt(id), Integer.parseInt(otherId), Integer.parseInt(money));
 
-			Date today = new Date();
-			String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
-				+ "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
+			    Date today = new Date();
+			    String header = "HTTP/1.1 201 \r\n" + today + "\r\n" + "Content-Type: text/json\r\n"
+				    + "Access-Control-Allow-Origin: *\r\n" + "Connection: close\r\n" + "\r\n";
 
-			String output = "{ \"moneyOper\": " + con.transactMoney(Integer.parseInt(id),
-				Integer.parseInt(otherId), Integer.parseInt(money)) + " }";
+			    String output = "{ \"moneyOper\": " + con.printMoney(Integer.parseInt(id)) + " }";
 
-			System.out.println(output);
+			    System.out.println(output);
 
-			String httpResponse = header + output;
+			    String httpResponse = header + output;
 
-			sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+			    sock.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+			}
 		    }
 		    br.close();
 		    count--;
@@ -556,8 +516,6 @@ public class Connect {
 		    }
 
 		    System.out.println("action: " + action + " id: " + id);
-
-		    System.out.println("Handle 'print' action");
 
 		    if (con.isAccInTable(Integer.parseInt(id))) {
 
