@@ -319,6 +319,10 @@ public class Connect {
 		String request = br.readLine(); // Now you get SOME index.html HTTP/1.1
 		System.out.println("request = " + request);
 
+		if (request == null) {
+		    continue;
+		}
+
 		String[] requestParam = request.split(" ");
 		String requestURL = requestParam[1];
 		System.out.println("requestURL = " + requestURL);
