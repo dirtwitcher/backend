@@ -15,13 +15,15 @@ public class Connect {
     public static String TransactionTableName = "TRANSVLAD916"; // table of transactions
     public static String AccountTableName = "ACCVLAD916"; // table of accounts
     public static Integer idAcc = 1;
+    public static String login = "******"; // USER №
+    public static String password = "******";
 
     public Connection connectToDB2() {
 	if (Connection != null)
 	    return Connection;
 	try {
 	    Class.forName("com.ibm.db2.jcc.DB2Driver");
-	    Connection = DriverManager.getConnection("jdbc:db2://localhost:5035/DALLASB", "USER01", "USER01");
+	    Connection = DriverManager.getConnection("jdbc:db2://localhost:5035/DALLASB", login, password);
 	    System.out.println("connection done");
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
